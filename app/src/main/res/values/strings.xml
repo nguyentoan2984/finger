@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">Finger</string>
+
+    <string-array name="FpCount">
+        <item>1700</item>
+        <item>2000</item>
+        <item>3000</item>
+    </string-array>
+
+    <string-array name="baud_rate">
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>57600</item>
+        <item>115200</item>
+    </string-array>
+
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="device">Device : </string>
+    <string name="baudrate">Baudrate : </string>
+    <string name="id">ID : </string>
+    <string name="enroll">Enroll</string>
+    <string name="identify">Identify</string>
+    <string name="get_empty_id">Get Empty ID</string>
+    <string name="remove_tmpl">Remove Tmpl</string>
+    <string name="read_temp">Read Template</string>
+    <string name="capture_ima">Capture Image</string>
+    <string name="set_pass">Set Password</string>
+    <string name="verfy_ima">Verify Image</string>
+    <string name="get_fea">Get Feature</string>
+    <string name="cancle">Cancel</string>
+    <string name="verify">Verify</string>
+    <string name="identifyfred">IdentifyFree</string>
+    <string name="get_enroll_count">Get Enroll Count</string>
+    <string name="remove_all">Remove All</string>
+    <string name="write_temp">Write Template</string>
+    <string name="get_fw_ver">Get FW Version</string>
+    <string name="verfiy_pas">Verify Password</string>
+    <string name="iden_ima">Identify Image</string>
+    <!--<string name="open_device">Please open device!</string>-->
+    <string name="open_device">Wellcome !</string>
+
+
+
+    <string name="cancle_command">Please cancel your command first</string>
+    <string name="input_userid_rangle">Please input correct user id(1~%d)</string>
+    <string name="input_userid">Please input user id</string>
+    <string name="input_device_password">Invalid Device Password.Please input valid device password(length=14)!</string>
+    <string name="title_activity_main">ChamCong</string>
+    <string name="title_home">Chấm Công</string>
+    <string name="title_dashboard">Quản Lý Nhân Viên</string>
+    <string name="title_notifications">Quản Lý Nhân Viên</string>
+</resources>

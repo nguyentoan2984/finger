@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">Finger</string>
+
+    <string-array name="FpCount">
+        <item>1700</item>
+        <item>2000</item>
+        <item>3000</item>
+    </string-array>
+
+    <string-array name="baud_rate">
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>57600</item>
+        <item>115200</item>
+    </string-array>
+
+    <string name="open">打开</string>
+    <string name="close">关闭</string>
+    <string name="device">设备 : </string>
+    <string name="baudrate">波特率 : </string>
+    <string name="id">ID : </string>
+    <string name="enroll">录入指纹</string>
+    <string name="identify">1：N比对</string>
+    <string name="get_empty_id">获取Temp</string>
+    <string name="remove_tmpl">移除Temp</string>
+    <string name="read_temp">读取Temp</string>
+    <string name="capture_ima">采集图像</string>
+    <string name="set_pass">设置通讯密码</string>
+    <string name="verfy_ima">单对比图像</string>
+    <string name="get_fea">获取数据</string>
+    <string name="cancle">取消</string>
+    <string name="verify">1:1比对</string>
+    <string name="identifyfred">循环对比</string>
+    <string name="get_enroll_count">获取已注册的指纹</string>
+    <string name="remove_all">移除所有</string>
+    <string name="write_temp">写入Temp</string>
+    <string name="get_fw_ver">获取FW的版本信息</string>
+    <string name="verfiy_pas">确认通讯密码</string>
+    <string name="iden_ima">多对比图像</string>
+    <string name="open_device">请打开设备!</string>
+
+
+    <string name="cancle_command">请先取消你发送的命令</string>
+    <string name="input_userid_rangle">请输入用户的Id(1~%d)</string>
+    <string name="input_userid">请输入用户的Id</string>
+    <string name="input_device_password">无效的设备密码。请输入有效的设备密码(长度=14)!</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_main">ChamCong</string>
+
+</resources>

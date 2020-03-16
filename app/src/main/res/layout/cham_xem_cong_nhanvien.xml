@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    >
+
+    <LinearLayout
+        android:id="@+id/linearlayout_cham_xem_chamcong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:adjustViewBounds="false"
+            android:paddingTop="20dp"
+            android:text="CHẤM CÔNG NHÂN VIÊN"
+            android:textColor="@color/colorPrimary"
+            android:textSize="28dp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="15dp">
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="nhập mã nhân viên "
+                android:paddingLeft="15dp" />
+
+            <Button
+                android:background="@drawable/custom_button_tai_chamcong"
+                android:textColor="#fff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tải Chấm Công"
+                android:textSize="20dp" />
+
+
+        </LinearLayout>
+
+
+            <LinearLayout
+                android:paddingTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="370dp"
+                android:orientation="vertical"
+                >
+
+                <ListView
+                    android:id="@+id/listview_chamcong_time_in_out"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

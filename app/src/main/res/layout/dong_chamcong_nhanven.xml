@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    android:orientation="horizontal"
+    android:weightSum="10"
+    >
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_weight="5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:paddingTop="5dp"
+            android:id="@+id/txt_name_nhanvien_chamcong_custom"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ho ten nhan vien"
+            android:textSize="16sp"
+            android:textColor="@color/colorPrimary"
+            />
+        <TextView
+            android:textStyle="bold"
+            android:id="@+id/txt_mnv_nhanvien_chamcong_custom"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            android:paddingTop="5dp"
+            android:layout_below="@+id/txt_name_nhanvien_chamcong_custom"
+            android:text="ma nhan vien"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:paddingLeft="20dp"
+        android:orientation="vertical"
+        android:layout_weight="3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:textStyle="bold"
+                android:paddingTop="5dp"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vào :"
+                android:textColor="@color/colorPrimaryDark"
+                />
+            <TextView
+                android:textStyle="bold"
+                android:paddingTop="5dp"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ra :"
+                android:textColor="@color/colorPrimaryDark"
+                />
+
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_weight="2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/txt_time_in_chamcong_custom"
+            android:textStyle="bold"
+            android:paddingTop="5dp"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="04:30"
+            android:textColor="#F0100A"
+            />
+        <TextView
+            android:id="@+id/txt_time_out_chamcong_custom"
+            android:textStyle="bold"
+            android:paddingTop="5dp"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="09:30"
+            android:textColor="#F0100A"
+            />
+
+    </LinearLayout>
+    <!--android:layout_alignParentRight="true"-->
+
+
+</LinearLayout>
