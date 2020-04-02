@@ -443,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onFailure(Call<ArrayList<Nhanvien>> call, Throwable t) {
             Toast.makeText(MainActivity.this, "kết nối tới Server bị lỗi.", Toast.LENGTH_LONG).show();
-            Log.e("Error", "Load danh sach nhan vien Error"+ t.toString());
+//            Log.e("Error", "Load danh sach nhan vien Error"+ t.toString());
             progressBar_loading.setVisibility(View.GONE);
 
         }
