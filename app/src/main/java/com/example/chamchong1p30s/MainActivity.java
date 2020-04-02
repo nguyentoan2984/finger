@@ -1,14 +1,19 @@
 package com.example.chamchong1p30s;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.annotation.NonNull;
@@ -17,10 +22,12 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,8 +55,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.function.Consumer;
 
 import okhttp3.ResponseBody;
@@ -76,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String m_strPost;
     String m_szDevice;
     public final static String domain="http://192.168.1.5:3000";
+    public static String macuahang="";
 //    public final static String domain="http://colus.com.vn";
 
 
@@ -84,20 +97,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button m_btnCaptureImage, m_btnCancel, m_btnGetUserCount, m_btnGetEmptyID, m_btnDeleteID, m_btnDeleteAll, m_btnReadTemplate;
     Button m_btnWriteTemplate, m_btnGetFWVer, m_btnSetDevPass, m_btnVerifyPass, m_btnVerifyImage, m_btnIdentifyImage;
     Button m_btnGetFeature;
-    EditText m_editUserID, m_editDevPassword, m_editManvVantay;
+    EditText m_editUserID, m_editDevPassword, m_editManvVantay,m_editNgaychamcong;
     TextView m_txtStatus;
     ImageView m_FpImageViewer;
-    Button btn_cancel_add_vantay, btn_chamcong_vantay, btn_taive_vantay;
+    Button btn_cancel_add_vantay, btn_chamcong_vantay, btn_taive_vantay,btn_load_chamcong;
     Button btn_dialog_cancel_yes, btn_dialog_cancel_no;
+    Calendar myCalendar;
 
     Spinner m_spBaudrate, m_spDevice;
     public static ProgressBar progressBar_loading;
 
     private ScrollView innerScrollView;
 
-    private static String[] PERMISSIONS_STORAGE = {
-            "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.WRITE_EXTERNAL_STORAGE"};
+//    private static String[] PERMISSIONS_STORAGE = {
+//            "android.permission.READ_EXTERNAL_STORAGE",
+//            "android.permission.WRITE_EXTERNAL_STORAGE"};
     private String TAG = "MainActivity";
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -111,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     linearlayout_quanlynhanvien.setVisibility(View.GONE);
                     btn_cancel_add_vantay.setVisibility(View.GONE);
                     btn_chamcong_vantay.setVisibility(View.VISIBLE);
+                    chamcongArraylist_time_in_out.clear();
+                    chamCong_nhanVienAdapter.notifyDataSetChanged();
                     OnCancelBtn();
                     return true;
                 case R.id.navigation_qlnv:
@@ -119,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     btn_cancel_add_vantay.setVisibility(View.VISIBLE);
                     btn_chamcong_vantay.setVisibility(View.GONE);
                     nhanvienArrayList.clear();
-                    load_dsnhanvien("chphunhuan");
+                    load_dsnhanvien(macuahang);
                     OnCancelBtn();
                     return true;
             }
@@ -127,26 +143,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // 检测权限 Check permission
-        int permission = ActivityCompat.checkSelfPermission(this, "android.permission.WRITE_EXTERNAL_STORAGE");
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // 没有权限，会弹出对话框 No permission, a dialog will pop up
-            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 2);
-        }
+//        int permission = ActivityCompat.checkSelfPermission(this, "android.permission.WRITE_EXTERNAL_STORAGE");
+//        if (permission != PackageManager.PERMISSION_GRANTED) {
+//            // 没有权限，会弹出对话框 No permission, a dialog will pop up
+//            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, 2);
+//
+//        }
 
-
-
+        Intent intent=getIntent();
+        macuahang=intent.getStringExtra("macuahang");
 
         InitView();
         SetInitialState();
+        InitLayout();
+        OnCancelBtn();
+
 
         innerScrollView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -165,20 +190,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        m_spDevice.setSelection(9);
 
 
-        linearlayout_chamcong = (LinearLayout)findViewById(R.id.linearlayout_chamcong) ;
-        linearLayout_cham_xem_chamcong = (LinearLayout)findViewById(R.id.linearlayout_cham_xem_chamcong) ;
-        linearlayout_quanlynhanvien  = (LinearLayout) findViewById(R.id.linearlayout_quanlynhanvien);
-        listView_nhanvien= (ListView)findViewById(R.id.listview_nhanvien);
-        listView_chamcong_nhanvien=(ListView)findViewById(R.id.listview_chamcong_time_in_out) ;
-        linearLayout_cham_xem_chamcong.setVisibility(View.VISIBLE);
-        linearlayout_quanlynhanvien.setVisibility(View.GONE);
-        linearlayout_chamcong.setVisibility(View.GONE);
-        btn_cancel_add_vantay.setVisibility(View.GONE);
-        btn_chamcong_vantay.setVisibility(View.VISIBLE);
-        progressBar_loading.setVisibility(View.GONE);
+
+/////
+
 
 
         creatDatabase();
+        Datecurrent();
         nhanvienArrayList=new ArrayList<>();
         arrayAdapter=new NhanVienAdapter(this,R.layout.dong_nhanven,nhanvienArrayList);
         listView_nhanvien.setAdapter(arrayAdapter);
@@ -188,14 +206,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listView_chamcong_nhanvien.setAdapter((chamCong_nhanVienAdapter));
 
 
-
     }
+
+
 
     public void creatDatabase() {
-            database = new Database(this,"1p30s.sqlite",null,1);
+        String nameTable="";
+        database = new Database(this,"1p30s.sqlite",null,1);
+        Cursor cursor = MainActivity.database.GetData("SELECT name FROM sqlite_master WHERE type='table' AND name='NhanVien' COLLATE NOCASE");
+        while (cursor.moveToNext()){
+            nameTable = cursor.getString(0);
+        }
+
+        if( nameTable.equals("NhanVien")){
+//            Toast.makeText(this, nameTable, Toast.LENGTH_SHORT).show();
+            Log.d("aaa", "creatDatabase: da ton tai table NhanVien");
+
+        }
+        else {
             database.QueryData("CREATE TABLE IF NOT EXISTS NhanVien(Id INTEGER PRIMARY KEY AUTOINCREMENT,ten_nhanvien VARCHAR, ma_nhanvien VARCHAR(60),id_vantay INTEGER ) ");
+            if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0) {
+                Log.d("aaa", "creatDatabase: tao new , xoa all van tay");
+
+                OnDeleteAllBtn();
+
+            }
+        }
+
+
     }
 
+
+
+    private void InitLayout() {
+        linearLayout_cham_xem_chamcong.setVisibility(View.VISIBLE);
+        linearlayout_quanlynhanvien.setVisibility(View.GONE);
+        linearlayout_chamcong.setVisibility(View.GONE);
+        btn_cancel_add_vantay.setVisibility(View.GONE);
+        btn_chamcong_vantay.setVisibility(View.VISIBLE);
+        progressBar_loading.setVisibility(View.GONE);
+    }
 
     public void InitView() {
         m_FpImageViewer = (ImageView) findViewById(R.id.ivImageViewer);
@@ -227,13 +277,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         innerScrollView = (ScrollView) findViewById(R.id.innerScrollView);
 
         btn_cancel_add_vantay= (Button)findViewById(R.id.button_cancel_add_vantay);
-        btn_cancel_add_vantay.setOnClickListener(this);
         btn_chamcong_vantay=(Button)findViewById(R.id.button_chamcong_vantay);
-        btn_chamcong_vantay.setOnClickListener(this);
         btn_taive_vantay= (Button)findViewById(R.id.button_taive_vantay);
-        btn_taive_vantay.setOnClickListener(this);
+        btn_load_chamcong=(Button)findViewById(R.id.btn_load_chamcong);
+
         m_editManvVantay= (EditText)findViewById(R.id.edt_nhanvien_tai_vantay) ;
+        m_editNgaychamcong=(EditText)findViewById(R.id.ngaychamcong);
         progressBar_loading=(ProgressBar)findViewById(R.id.progressBar);
+        linearlayout_chamcong = (LinearLayout)findViewById(R.id.linearlayout_chamcong) ;
+        linearLayout_cham_xem_chamcong = (LinearLayout)findViewById(R.id.linearlayout_cham_xem_chamcong) ;
+        linearlayout_quanlynhanvien  = (LinearLayout) findViewById(R.id.linearlayout_quanlynhanvien);
+
+        listView_nhanvien= (ListView)findViewById(R.id.listview_nhanvien);
+        listView_chamcong_nhanvien=(ListView)findViewById(R.id.listview_chamcong_time_in_out) ;
+
+
 
         m_btnOpenDevice.setOnClickListener(this);
         m_btnCloseDevice.setOnClickListener(this);
@@ -255,6 +313,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_btnVerifyImage.setOnClickListener(this);
         m_btnGetFeature.setOnClickListener(this);
         m_btnIdentifyImage.setOnClickListener(this);
+        btn_cancel_add_vantay.setOnClickListener(this);
+        btn_chamcong_vantay.setOnClickListener(this);
+        btn_taive_vantay.setOnClickListener(this);
+        btn_load_chamcong.setOnClickListener(this);
+        m_editNgaychamcong.setOnClickListener(this);
 
         if (m_szHost == null) {
             m_szHost = new FingerLib(this, m_txtStatus, m_FpImageViewer, runEnableCtrl, m_spDevice);
@@ -310,69 +373,223 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view == m_btnGetFeature) {
             OnGetFeature();
         } else if (view == btn_cancel_add_vantay) {
-            progressBar_loading.setVisibility(View.GONE);
-            OnCancelBtn();
+            Cancel_add_vantay();
         } else if (view == btn_chamcong_vantay) {
-            if(MainActivity.m_szHost.m_bCmdDone==false) {
-                Toast.makeText(this, "Đã trong chế độ chấm công !", Toast.LENGTH_LONG).show();
-                return;
-            }
-            if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0){
-//                    MainActivity.m_szHost.Run_CmdCancel();
-//                MainActivity.m_szHost.Run_CmdGetEmptyID(nhanvien.getMa_nhanvien(),nhanvien.getTen_nhanvien(),"vantayLocal");
-                EnableCtrl(true);
-                m_btnOpenDevice.setEnabled(false);
-                m_btnCloseDevice.setEnabled(true);
-                OnIdentifyFreeBtn();
-            }
-//            OnIdentifyFreeBtn();
-
-
+            Begin_chamcong();
         } else if (view == btn_taive_vantay) {
-            if (TimeUtils.isFastClick()) {
-                return;
-            }
-            String ma_nhanvien_tai_vantay = m_editManvVantay.getText().toString().trim();
-            if(ma_nhanvien_tai_vantay.equals("1234")){
-                if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0) {
-                    OnDeleteAllBtn();
-                }
-
-                return;
-            }
-            if(ma_nhanvien_tai_vantay.equals("4321")){
-                m_editUserID.setText("1");
-                if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0) {
-                    OnWriteTemplateBtn();
-                }
-                return;
-            }
-
-           if(!ma_nhanvien_tai_vantay.isEmpty())
-           {
-               if(MainActivity.m_szHost.m_bCmdDone==false) {
-                   Toast.makeText(this, "Đang xử lý, bạn vui lòng chờ hoặc nhấn Cancel và thực hiện lại !", Toast.LENGTH_LONG).show();
-                   return;
-               }
-
-               if(check_database_manhanvien(ma_nhanvien_tai_vantay).equals(ma_nhanvien_tai_vantay)){
-                   Toast.makeText(this, "Mã nhân viên đã tồn tại trong thiết bị !", Toast.LENGTH_LONG).show();
-                   return;
-               }
-
-                   if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0) {
-                       getArray_fingerUser(ma_nhanvien_tai_vantay);
-
-                   }
-
-
-           }else {
-               Toast.makeText(this, "Vui lòng nhập mã nhân viên", Toast.LENGTH_SHORT).show();
-           }
-
+            Load_vantay_one_manhanvien();
+        } else if (view == m_editNgaychamcong) {
+            Chonngay();
+        }else if (view == btn_load_chamcong) {
+            load_chamcong_nhanvien();
         }
     }
-    public String check_database_manhanvien( String manhanvien) {
+    public void Datecurrent(){
+        myCalendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat(("YYYY-MM-dd"));
+        m_editNgaychamcong.setText(simpleDateFormat.format(myCalendar.getTime()));
+
+    }
+
+    public void Chonngay(){
+        myCalendar = Calendar.getInstance();
+        int ngay   = myCalendar.get(Calendar.DATE);
+        int thang  = myCalendar.get(Calendar.MONTH);
+        int nam    = myCalendar.get(Calendar.YEAR);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                myCalendar.set(year,month,dayOfMonth);
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat(("YYYY-MM-dd"));
+                m_editNgaychamcong.setText(simpleDateFormat.format(myCalendar.getTime()));
+                chamcongArraylist_time_in_out.clear();
+                chamCong_nhanVienAdapter.notifyDataSetChanged();
+
+            }
+        },nam,thang,ngay);
+        datePickerDialog.show();
+
+    }
+//////////////////
+    public void         load_dsnhanvien(String macuahang){
+    progressBar_loading.setVisibility(View.VISIBLE);
+
+    Dataclient dataclient = APIUtils.getdata(MainActivity.this);
+
+    Call<ArrayList<Nhanvien>> call = dataclient.getUsers(macuahang);
+
+    call.enqueue(new Callback<ArrayList<Nhanvien>>() {
+        @Override
+        public void onResponse(Call<ArrayList<Nhanvien>> call, Response<ArrayList<Nhanvien>> response) {
+            if(response.isSuccessful()){
+
+                if(response.body().isEmpty()){
+                    Toast.makeText(MainActivity.this,"Danh sách nhân viên không tồn tại.\r\n Vui lòng tiến hành cập nhật danh sách nhân viên.", Toast.LENGTH_LONG).show();
+                }else{
+                    nhanvienArrayList.clear();
+                    for (int i = 0; i < response.body().size(); i++) {
+                        nhanvienArrayList.add(response.body().get(i));
+                    }
+                    arrayAdapter.notifyDataSetChanged();
+                }
+
+            }
+            Log.d("aaa", nhanvienArrayList.toString());
+
+            progressBar_loading.setVisibility(View.GONE);
+
+        }
+
+        @Override
+        public void onFailure(Call<ArrayList<Nhanvien>> call, Throwable t) {
+            Toast.makeText(MainActivity.this, "kết nối tới Server bị lỗi.", Toast.LENGTH_LONG).show();
+            Log.e("Error", "Load danh sach nhan vien Error"+ t.toString());
+            progressBar_loading.setVisibility(View.GONE);
+
+        }
+    });
+}
+
+    public void  Load_vantay_one_manhanvien(){
+        String ma_nhanvien_tai_vantay = m_editManvVantay.getText().toString().trim();
+        if(MainActivity.m_szHost.m_bCmdDone==false) {
+            Toast.makeText(this, "Đang xử lý, bạn vui lòng chờ hoặc nhấn Cancel và thực hiện lại !", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if(ma_nhanvien_tai_vantay.equals("0315082172")){
+            if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0) {
+                OnDeleteAllBtn();
+            }
+            return;
+        }
+
+        if(!ma_nhanvien_tai_vantay.isEmpty())
+        {
+            if(MainActivity.m_szHost.m_bCmdDone==false) {
+                Toast.makeText(this, "Đang xử lý, bạn vui lòng chờ hoặc nhấn Cancel và thực hiện lại !", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if(check_database_manhanvien(ma_nhanvien_tai_vantay).equals(ma_nhanvien_tai_vantay)){
+                Toast.makeText(this, "Mã nhân viên đã tồn tại trong thiết bị !", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0) {
+                getArray_fingerUser(ma_nhanvien_tai_vantay);
+
+            }
+
+
+        }else {
+            Toast.makeText(this, "Vui lòng nhập mã nhân viên", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public void         getArray_fingerUser(String ma_nhanvien_tai_vantay){
+//        Toast.makeText(this, ma_nhanvien_tai_vantay, Toast.LENGTH_SHORT).show();
+        Dataclient dataclient = APIUtils.getdata(MainActivity.this);
+
+        Call <ArrayList<Nhanvien>> call =dataclient.getUser_vantay( ma_nhanvien_tai_vantay);
+
+        call.enqueue(new Callback<ArrayList<Nhanvien>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Nhanvien>> call, Response<ArrayList<Nhanvien>> response) {
+//                Toast.makeText(MainActivity.this, response.body().get(0).toString(), Toast.LENGTH_SHORT).show();
+                if(response.isSuccessful()){
+//                    Toast.makeText(MainActivity.this,response.body().toString(), Toast.LENGTH_LONG).show();
+                    Log.e("aaa12", response.body().toString());
+
+
+                    if(response.body().isEmpty()){
+                        Toast.makeText(MainActivity.this,"Mã nhân viên chưa có dữ liệu vân tay trên hệ thống.\r\nVui lòng tiến hành lấy dấu vân tay.", Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        m_szHost.getImage_fingerUser(response.body());
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Nhanvien>> call, Throwable t) {
+                Log.e("aaa", "error");
+                Toast.makeText(MainActivity.this, "Mã nhân viên không tồn tại.\r\nHoặc đường truyền mạng có vấn đề.\r\nVui lòng thử lại.", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+
+    public void         load_chamcong_nhanvien(){
+        String ngaychamcong = m_editNgaychamcong.getText().toString().trim();
+        Dataclient dataclient = APIUtils.getdata(MainActivity.this);
+        MainActivity.progressBar_loading.setVisibility(View.VISIBLE);
+        Call <ArrayList<Nhanvien>> call =dataclient.load_chamcong_nhanvien(ngaychamcong,macuahang);
+        call.enqueue(new Callback<ArrayList<Nhanvien>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Nhanvien>> call, Response<ArrayList<Nhanvien>> response) {
+                if(response.isSuccessful()) {
+                        if(response.body().size()==0){
+                            progressBar_loading.setVisibility(View.GONE);
+                            Toast.makeText(MainActivity.this, "Không có danh sách chấm công trong ngày", Toast.LENGTH_SHORT).show();
+                                return;
+                        }
+                        else if (response.body().get(response.body().size()-1).getControl().equals("success")) {
+                            chamcongArraylist_time_in_out.clear();
+                            for (int i = 0; i < response.body().size()-1; i++) {
+                                MainActivity.chamcongArraylist_time_in_out.add(response.body().get(i));
+                            }
+                            chamCong_nhanVienAdapter.notifyDataSetChanged();
+                            progressBar_loading.setVisibility(View.GONE);
+
+                        }
+                        else if (response.body().get(response.body().size()-1).getControl().equals("error")) {
+                            chamcongArraylist_time_in_out.clear();
+                            Toast.makeText(MainActivity.this, "Đã có lổi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
+                                 progressBar_loading.setVisibility(View.GONE);
+
+                        }else {
+                            Toast.makeText(MainActivity.this, "Đã có lổi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
+                            progressBar_loading.setVisibility(View.GONE);
+                        }
+                }else{
+                    chamcongArraylist_time_in_out.clear();
+                    Toast.makeText(MainActivity.this, "Đã có lổi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
+                    progressBar_loading.setVisibility(View.GONE);;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Nhanvien>> call, Throwable t) {
+                chamcongArraylist_time_in_out.clear();
+                Toast.makeText(MainActivity.this, "Đã có lổi xảy ra, vui lòng thử lại ", Toast.LENGTH_SHORT).show();
+                progressBar_loading.setVisibility(View.GONE);
+                Log.d("load_chamcong", t.getMessage());
+            }
+        });
+
+    }
+
+    public void         Begin_chamcong(){
+        if(MainActivity.m_szHost.m_bCmdDone==false) {
+            Toast.makeText(this, "Đã trong chế độ chấm công !", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0){
+            EnableCtrl(true);
+            m_btnOpenDevice.setEnabled(false);
+            m_btnCloseDevice.setEnabled(true);
+            OnIdentifyFreeBtn();
+        }
+    }
+
+    public void         Cancel_add_vantay(){
+        progressBar_loading.setVisibility(View.GONE);
+        OnCancelBtn();
+    }
+
+    public String       check_database_manhanvien( String manhanvien) {
         String maNV_return="";
         Cursor cursor = MainActivity.database.GetData("SELECT NhanVien.ma_nhanvien FROM NhanVien WHERE ma_nhanvien='" + manhanvien + "' ");
         while (cursor.moveToNext()){
@@ -384,7 +601,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return  maNV_return;
 
     }
-    public static int check_database_sumId( String manhanvien) {
+
+    public static int   check_database_sumId( String manhanvien) {
         int sumId=0;
         ArrayList arrayListSumid= new ArrayList();
         Cursor cursor = MainActivity.database.GetData("SELECT NhanVien.id_vantay FROM NhanVien WHERE ma_nhanvien='" + manhanvien + "' ");
@@ -398,66 +616,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return  sumId;
 
     }
+///////////////
 
-
-    public  void load_dsnhanvien(String macuahang){
-        progressBar_loading.setVisibility(View.VISIBLE);
-
-        Dataclient dataclient = APIUtils.getdata();
-
-        Call<ArrayList<Nhanvien>> call = dataclient.getUsers(macuahang);
-
-        call.enqueue(new Callback<ArrayList<Nhanvien>>() {
-            @Override
-            public void onResponse(Call<ArrayList<Nhanvien>> call, Response<ArrayList<Nhanvien>> response) {
-                if(response.isSuccessful()){
-                    nhanvienArrayList.clear();
-                    for (int i = 0; i < response.body().size(); i++) {
-                        nhanvienArrayList.add(response.body().get(i));
-                    }
-                    arrayAdapter.notifyDataSetChanged();
-                }
-                progressBar_loading.setVisibility(View.GONE);
-
-            }
-
-            @Override
-            public void onFailure(Call<ArrayList<Nhanvien>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Ket noi toi Server bi loi !!", Toast.LENGTH_SHORT).show();
-                Log.e("Error", "Load danh sach nhan vien Error");
-                progressBar_loading.setVisibility(View.GONE);
-
-            }
-        });
-    }
-
-    public  void getArray_fingerUser(String ma_nhanvien_tai_vantay){
-//        Toast.makeText(this, ma_nhanvien_tai_vantay, Toast.LENGTH_SHORT).show();
-        Dataclient dataclient = APIUtils.getdata();
-
-        Call <ArrayList<Nhanvien>> call =dataclient.getUser_vantay( ma_nhanvien_tai_vantay);
-
-        call.enqueue(new Callback<ArrayList<Nhanvien>>() {
-            @Override
-            public void onResponse(Call<ArrayList<Nhanvien>> call, Response<ArrayList<Nhanvien>> response) {
-//                Toast.makeText(MainActivity.this, response.body().get(0).toString(), Toast.LENGTH_SHORT).show();
-                    if(response.isSuccessful()){
-                        m_szHost.getImage_fingerUser(response.body());
-                    }
-            }
-
-            @Override
-            public void onFailure(Call<ArrayList<Nhanvien>> call, Throwable t) {
-                Log.e("aaa", "error");
-                Toast.makeText(MainActivity.this, "Mã nhân viên không tồn tại.\r\nHoặc đường truyền mạng có vấn đề.\r\nVui lòng thử lại.", Toast.LENGTH_SHORT).show();
-
-            }
-        });
-    }
-
-
-
-    public  void EnableCtrl(boolean bEnable) {
+    public void EnableCtrl(boolean bEnable) {
         m_btnEnroll.setEnabled(bEnable);
         m_btnVerify.setEnabled(bEnable);
         m_btnIdentify.setEnabled(bEnable);
@@ -818,8 +979,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
 //                Toast.makeText(MainActivity.this, "Thoat chuong trinh", Toast.LENGTH_SHORT).show();
-                finish();
-                System.exit(0);
+//                finish();
+//////                System.exit(0);
+                moveTaskToBack(true);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
             }
         });
         btn_dialog_cancel_no=(Button)dialog.findViewById(R.id.dialog_cancel);
@@ -899,15 +1063,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 2:
-                break;
-            default:
-                break;
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        switch (requestCode) {
+//            case 2:
+//                Log.d("onItemSelected", "item: 1" );
+//
+//                break;
+//            default:
+//                Log.d("onItemSelected", "item: 2" );
+//
+//                break;
+//        }
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//    }
 
 }
