@@ -30,19 +30,32 @@
             android:layout_gravity="center"
             android:orientation="horizontal"
             android:paddingTop="15dp">
+            <TextView
+                android:textColor="#3949AB"
+                android:paddingLeft="10dp"
+                android:textSize="24sp"
+                android:text="Ngày:"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <EditText
+                android:textSize="24sp"
+                android:id="@+id/ngaychamcong"
+                android:clickable="true"
+                android:editable="false"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="nhập mã nhân viên "
+                android:hint="Chọn ngày  "
                 android:paddingLeft="15dp" />
 
             <Button
-                android:background="@drawable/custom_button_tai_chamcong"
-                android:textColor="#fff"
+                android:id="@+id/btn_load_chamcong"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tải Chấm Công"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/custom_button_tai_chamcong"
+                android:text="Tải"
+                android:textColor="#fff"
                 android:textSize="20dp" />
 
 

@@ -35,7 +35,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="nhập mã nhân viên "
-                android:paddingLeft="15dp" />
+                android:paddingLeft="15dp"
+                android:inputType="numberDecimal"
+                />
 
             <Button
                 android:textColor="#ffff"

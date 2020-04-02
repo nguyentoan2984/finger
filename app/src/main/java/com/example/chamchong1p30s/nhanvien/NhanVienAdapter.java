@@ -85,18 +85,18 @@ public class NhanVienAdapter extends BaseAdapter {
                     Toast.makeText(context, "Đang xử lý, bạn vui lòng chờ hoặc nhấn Cancel và thực hiện lại !", Toast.LENGTH_LONG).show();
                     return;
                 }
+                if(nhanvien.getImage_finger().size()>=3){
+                    Toast.makeText(context, "Chỉ được lưu tối đa 3 dấu vân tay cho một nhân viên!\r\nNếu máy chưa có dữ liệu vân tay của bạn,vui lòng nhập mã nhân viên và nhấn tải vân tay về.", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 if(MainActivity.check_database_sumId(nhanvien.getMa_nhanvien())>=3){
                     Toast.makeText(context, "Chỉ được lưu tối đa 3 dấu vân tay cho một nhân viên !", Toast.LENGTH_LONG).show();
                     return;
                 }
 
                 if(MainActivity.m_szHost.OpenDevice("/dev/ttyMT3",115200)==0){
-//                    MainActivity.m_szHost.Run_CmdCancel();
-
-
                     MainActivity.m_szHost.Run_CmdGetEmptyID(nhanvien.getMa_nhanvien(),nhanvien.getTen_nhanvien(),"vantayLocal",null);
                 }
-//                    MainActivity.m_szHost.Run_CmdGetEmptyID(nhanvien.getMa_nhanvien(),nhanvien.getTen_nhanvien(),"vantayLocal");
 
 
             }

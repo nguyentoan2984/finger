@@ -11,16 +11,28 @@ public class Nhanvien {
     private String time_out;
     private ArrayList image_finger;
     private String control;
+    private String macuahang;
 
-
-    public Nhanvien(String ten_nhanvien, String ma_nhanvien, int id_vantay, String time_in, String time_out, ArrayList image_finger,String control) {
+    public Nhanvien(String ten_nhanvien, String ma_nhanvien, int id_vantay, String time_in, String time_out, ArrayList image_finger, String control, String macuahang) {
         this.ten_nhanvien = ten_nhanvien;
         this.ma_nhanvien = ma_nhanvien;
         this.id_vantay = id_vantay;
         this.time_in = time_in;
         this.time_out = time_out;
         this.image_finger = image_finger;
+        this.control = control;
+        this.macuahang = macuahang;
     }
+
+//    public Nhanvien(String ten_nhanvien, String ma_nhanvien, int id_vantay, String time_in, String time_out, ArrayList image_finger,String control) {
+//        this.ten_nhanvien = ten_nhanvien;
+//        this.ma_nhanvien = ma_nhanvien;
+//        this.id_vantay = id_vantay;
+//        this.time_in = time_in;
+//        this.time_out = time_out;
+//        this.image_finger = image_finger;
+//    }
+
 
     public String getTen_nhanvien() {
         return ten_nhanvien;
@@ -78,6 +90,14 @@ public class Nhanvien {
         this.control = control;
     }
 
+    public String getMacuahang() {
+        return macuahang;
+    }
+
+    public void setMacuahang(String macuahang) {
+        this.macuahang = macuahang;
+    }
+
     @Override
     public String toString() {
         return "Nhanvien{" +
@@ -88,6 +108,7 @@ public class Nhanvien {
                 ", time_out='" + time_out + '\'' +
                 ", image_finger=" + image_finger +
                 ", control='" + control + '\'' +
+                ", macuahang='" + macuahang + '\'' +
                 '}';
     }
 }

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.example.chamchong1p30s.MainActivity;
 import com.example.chamchong1p30s.Retrofit.APIUtils;
+import com.example.chamchong1p30s.Retrofit.Database;
 import com.example.chamchong1p30s.Retrofit.Dataclient;
 import com.example.chamchong1p30s.nhanvien.Nhanvien;
 import com.google.gson.JsonArray;
@@ -1650,18 +1651,51 @@ public class FingerLib {
 
  //////////////////
 
+///// remove app khi cai lai thuc hien xoa toan bo ID va get danh sach server ve cai vao thiet bi
+        if(p_nCode==(short) DevComm.CMD_CLEAR_ALLTEMPLATE_CODE && w_nRet == (short) DevComm.ERR_SUCCESS){
+            Log.d("Add Finger ReadTemplate","add finger ok"+String.valueOf(empty_id));
+            m_devComm.memset(m_devComm.m_abyPacket, (byte) 0, 64 * 1024);
+            m_bCmdDone = true;
 
+            MainActivity.database.QueryData("DELETE FROM NhanVien");
+
+            Dataclient dataclient = APIUtils.getdata(mContext);
+                Call<ArrayList<Nhanvien>> call = dataclient.getUsers(MainActivity.macuahang);
+
+                call.enqueue(new Callback<ArrayList<Nhanvien>>() {
+                    @Override
+                    public void onResponse(Call<ArrayList<Nhanvien>> call, Response<ArrayList<Nhanvien>> response) {
+                        if(response.isSuccessful()){
+
+                            if(response.body().isEmpty()){
+                                Toast.makeText(mContext,"Danh sách nhân viên không tồn tại.\r\n Vui lòng tiến hành cập nhật danh sách nhân viên.", Toast.LENGTH_LONG).show();
+                            }else{
+                                getImage_fingerUser(response.body());
+
+                            }
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<ArrayList<Nhanvien>> call, Throwable t) {
+                        Toast.makeText(mContext, "kết nối tới Server bị lỗi.", Toast.LENGTH_LONG).show();
+                        Log.e("Error", "Load danh sach nhan vien Error");
+
+                    }
+                });
+
+
+        }
+//// tien hanh get id cho 2 truong hop lay van tay local va get van tay server
         if(p_nCode==(short) DevComm.CMD_GET_EMPTY_ID_CODE && w_nRet == (short) DevComm.ERR_SUCCESS){
                     String vantayLocal="vantayLocal";
                     String vantayNetwork="vantayNetwork";
-
                      empty_id=w_nData;
-            Log.d("Add Finger Local-GetId",imgUrlVantay+String.valueOf(empty_id));
 
-            if(imgUrlVantay.equals(vantayLocal)){
+                    if(imgUrlVantay.equals(vantayLocal)){
                         Log.d("Add Finger Local-GetId","get local id ok"+String.valueOf(empty_id));
-        //                m_txtStatus.post(m_runEnableCtrl);
-        //                m_txtStatus.setText(m_strPost);
                         m_devComm.memset(m_devComm.m_abyPacket, (byte) 0, 64 * 1024);
                         m_bCmdDone = true;
                         Run_CmdEnroll(empty_id);
@@ -1669,17 +1703,14 @@ public class FingerLib {
                     }
                     else if(imgUrlVantay.equals(vantayNetwork)){
                         Log.d("Add Finger NW-GetId","get id network ok"+String.valueOf(empty_id));
-        //                m_txtStatus.post(m_runEnableCtrl);
-        //                m_txtStatus.setText(m_strPost);
                         m_devComm.memset(m_devComm.m_abyPacket, (byte) 0, 64 * 1024);
                         m_bCmdDone = true;
-
                         do_one_getImage_fingerUser(linkImage)  ;
                         return;
                     }
 
         }
-
+//// sau khi co ID tien hanh lay dau van tay cho thiet bi, tao template va post template len server luu tru
         if(p_nCode==(short) DevComm.CMD_ENROLL_CODE && w_nRet == (short) DevComm.ERR_SUCCESS){
             Log.d("Add Finger ReadTemplate","add finger ok"+String.valueOf(empty_id));
             m_devComm.memset(m_devComm.m_abyPacket, (byte) 0, 64 * 1024);
@@ -1701,6 +1732,7 @@ public class FingerLib {
             }
 
         }
+//// load hinh anh van tay tren server ve luu vao thiet bi va thuc hien ghi Id cham cong va insert database
         if(p_nCode==(short) DevComm.CMD_WRITE_TEMPLATE_CODE && w_nRet == (short) DevComm.ERR_SUCCESS){
             Log.d("Add Finger WriteTemp","add finger id"+String.valueOf(empty_id));
             m_devComm.memset(m_devComm.m_abyPacket, (byte) 0, 64 * 1024);
@@ -1725,7 +1757,7 @@ public class FingerLib {
 
             return;
         }
-
+///// thuc hien readtemplate neu bi loi xoa id van tay da lay truoc do trong thiet bi
         if(p_nCode==(short) DevComm.CMD_READ_TEMPLATE_CODE && status_cmt==false){
             Log.d("Add Finger ReadTemplate","status_cmt id"+String.valueOf(empty_id));
                 m_devComm.memset(m_devComm.m_abyPacket, (byte) 0, 64 * 1024);
@@ -1762,9 +1794,9 @@ public class FingerLib {
             return;
         }
 
-        Dataclient dataclient = APIUtils.getdata();
+        Dataclient dataclient = APIUtils.getdata(mContext);
 
-        Call<ArrayList<Nhanvien>> callback = dataclient.send_chamcong_nhanvien(maNV_return);
+        Call<ArrayList<Nhanvien>> callback = dataclient.send_chamcong_nhanvien(maNV_return,MainActivity.macuahang);
         MainActivity.progressBar_loading.setVisibility(View.VISIBLE);
 
 
@@ -1775,22 +1807,6 @@ public class FingerLib {
 
 //
                 if(response.isSuccessful()) {
-//                    MainActivity.chamcongArraylist_time_in_out=response.body();
-//                    MainActivity.chamCong_nhanVienAdapter.notifyDataSetChanged();
-//                    m_strPost = String.format("Kết quả: thành công \r\n");
-//                    m_strPost += String.format("(Xin mời vân tay tiếp theo)\r\n");
-//                    m_strPost += String.format("\r\n%s", finalTenNV_return);
-//                    m_txtStatus.setText(m_strPost);
-//                    MainActivity.progressBar_loading.setVisibility(View.GONE);
-//                    Log.d("send_chamcong_nhanvien", "success"+w_nData);
-
-//                    Toast.makeText(mContext, response.body().toString(), Toast.LENGTH_LONG).show();
-//                    Log.d("send", String.valueOf(response.body().get(0)));
-//                    JsonObject success = new JsonObject();
-//                    success.addProperty("control", "success");
-//                    JsonObject error = new JsonObject();
-//                    error.addProperty("control", "error");
-//
                     if (response.body().get(response.body().size()-1).getControl().equals("success")) {
                         MainActivity.chamcongArraylist_time_in_out.clear();
                         for (int i = 0; i < response.body().size()-1; i++) {
@@ -2304,7 +2320,7 @@ public class FingerLib {
 
                     MultipartBody.Part body = MultipartBody.Part.createFormData("file",path_template,requesBody);
 
-                    Dataclient dataclient = APIUtils.getdata();
+                    Dataclient dataclient = APIUtils.getdata(mContext);
 
                     Call<JsonObject> callback = dataclient.uploadPhoto(body,maNhanvien);
                     MainActivity.progressBar_loading.setVisibility(View.VISIBLE);
@@ -2320,7 +2336,6 @@ public class FingerLib {
 
                                     if (response.body().equals(success)) {
 
-                                        Toast.makeText(mContext, response.body().get("control").toString(), Toast.LENGTH_SHORT).show();
                                         m_strPost = String.format("Kết quả: thành công.\r\nVân tay có ID : %d", id);
                                         m_txtStatus.post(m_runEnableCtrl);
                                         m_txtStatus.setText(m_strPost);
@@ -2430,45 +2445,88 @@ public class FingerLib {
 
 
 
+//    public  void getImage_fingerUser(final ArrayList<Nhanvien> arrayList_nhanvien) {
+//        final String tennhanvien =arrayList_nhanvien.get(0).getTen_nhanvien();
+//        final String manhanvien =arrayList_nhanvien.get(0).getMa_nhanvien();
+//        ArrayList image_finger  =new ArrayList();
+//        image_finger=arrayList_nhanvien.get(0).getImage_finger();
+//        final ArrayList finalImage_finger = image_finger;
+//        Log.e("aaa", finalImage_finger.toString());
+//
+//        thread_loadUrl_finger=new Thread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                for (int i = 0; i < finalImage_finger.size(); i++) {
+//                                    Log.d("add", String.valueOf(m_bCmdDone));
+//                                    while(!m_bCmdDone)
+//                                    {
+//                                        synchronized(monitor)
+//                                        {
+//                                            try
+//                                                {
+//                                                  monitor.wait();
+//                                                } catch(InterruptedException e)
+//                                                    {
+//
+//                                                    }
+//                                        }
+//
+//                                    }
+//
+//                                    Log.d("add", "run: ok qua");
+//                                    Run_CmdGetEmptyID(manhanvien, tennhanvien, "vantayNetwork",finalImage_finger.get(i).toString());
+//                                    m_bCmdDone=false;
+//                                        }
+//                                    }
+//                                });
+//     thread_loadUrl_finger.start();
+//    }
+
     public  void getImage_fingerUser(final ArrayList<Nhanvien> arrayList_nhanvien) {
-        final String tennhanvien =arrayList_nhanvien.get(0).getTen_nhanvien();
-        final String manhanvien =arrayList_nhanvien.get(0).getMa_nhanvien();
-        ArrayList image_finger  =new ArrayList();
-        image_finger=arrayList_nhanvien.get(0).getImage_finger();
-        final ArrayList finalImage_finger = image_finger;
         thread_loadUrl_finger=new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                for (int i = 0; i < finalImage_finger.size(); i++) {
-                                    Log.d("add", String.valueOf(m_bCmdDone));
-                                    while(!m_bCmdDone)
-                                    {
-                                        synchronized(monitor)
-                                        {
-                                            try
-                                                {
-                                                  monitor.wait();
-                                                } catch(InterruptedException e)
-                                                    {
+            @Override
+            public void run() {
+                for (int t = 0; t <arrayList_nhanvien.size() ; t++) {
+                    final String tennhanvien =arrayList_nhanvien.get(t).getTen_nhanvien();
+                    final String manhanvien =arrayList_nhanvien.get(t).getMa_nhanvien();
+                    ArrayList image_finger  =new ArrayList();
+                    image_finger=arrayList_nhanvien.get(t).getImage_finger();
+                    final ArrayList finalImage_finger = image_finger;
+                     Log.e("add", finalImage_finger.toString());
 
-                                                    }
-                                        }
+                    for (int i = 0; i < finalImage_finger.size(); i++) {
+                        Log.d("add", String.valueOf(m_bCmdDone));
+                        while(!m_bCmdDone)
+                        {
+                            synchronized(monitor)
+                            {
+                                try
+                                {
+                                    monitor.wait();
+                                } catch(InterruptedException e)
+                                {
 
-                                    }
+                                }
+                            }
 
-                                    Log.d("add", "run: ok qua");
-                                    Run_CmdGetEmptyID(manhanvien, tennhanvien, "vantayNetwork",finalImage_finger.get(i).toString());
-                                    m_bCmdDone=false;
-                                        }
-                                    }
-                                });
-     thread_loadUrl_finger.start();
+                        }
+
+                        Log.d("add", "run: ok qua");
+                        Run_CmdGetEmptyID(manhanvien, tennhanvien, "vantayNetwork",finalImage_finger.get(i).toString());
+                        m_bCmdDone=false;
+                    }
+
+                }
+            }
+        });
+        thread_loadUrl_finger.start();
     }
+
 
     public void do_one_getImage_fingerUser(String urlImage){
 
-        String stringUrl=domain+"/colusltd/images/"+urlImage ;
-        Dataclient dataclient = APIUtils.getdata();
+        String stringUrl= domain+"/finger/"+urlImage ;
+        Dataclient dataclient = APIUtils.getdata(mContext);
         Call<ResponseBody> call = dataclient.downloadFileWithDynamicUrlSync(stringUrl);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -2500,6 +2558,10 @@ public class FingerLib {
 
             String w_szSaveDirPath =
                     Environment.getExternalStorageDirectory().getAbsolutePath() + "/sz_template";
+            File w_fpDir = new File(w_szSaveDirPath);
+            if (!w_fpDir.exists()) {
+                w_fpDir.mkdirs();
+            }
             // todo change the file location/name according to your needs
 //            File futureStudioIconFile = new File(getExternalFilesDir("/storage/emulates/0/sz_template") + File.separator + "1.fpt");
             File futureStudioIconFile = new File( w_szSaveDirPath + File.separator + count +".fpt");

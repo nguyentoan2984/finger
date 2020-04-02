@@ -3,7 +3,7 @@
     <!-- This is the stroke you want to define -->
     <solid android:color="#F44336"></solid>
     <size android:height="15dp"
-        android:width="150dp"></size>
+        android:width="50dp"></size>
     <corners android:radius="25dp"></corners>
 </shape>
     <!--android:bottomRightRadius="5dp"-->
